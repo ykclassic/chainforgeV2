@@ -1,25 +1,44 @@
 import numpy as np
 import pandas as pd
 
-def calculate_performance_metrics(returns_series):
-    if returns_series.empty: return {}
+def calculate_performance_metrics(returns_series, risk_free_rate=0.04):
 
-    ann_factor = 8760 # Hourly 24/7
-    mean_ret = returns_series.mean() * ann_factor
-    vol = returns_series.std(ddof=1) * np.sqrt(ann_factor)
-    
-    # Sharpe Ratio
-    sharpe = mean_ret / vol if vol != 0 else 0
+    if returns_series.empty:
+        return {}
 
-    # Drawdown
-    cum = (1 + returns_series).cumprod()
-    max_dd = (cum / cum.cummax() - 1).min()
-    
-    # Recovery
-    recovery = (cum.iloc[-1] - 1) / abs(max_dd) if max_dd != 0 else 0
+    periods_per_year = 8760
+
+    rf_per_period = (1 + risk_free_rate) ** (1 / periods_per_year) - 1
+
+    excess_returns = returns_series - rf_per_period
+
+    mean_ret = returns_series.mean() * periods_per_year
+    vol = returns_series.std(ddof=1) * np.sqrt(periods_per_year)
+
+    sharpe = (
+        np.sqrt(periods_per_year) * excess_returns.mean() / excess_returns.std(ddof=1)
+        if excess_returns.std(ddof=1) != 0 else np.nan
+    )
+
+    downside = np.minimum(0, returns_series - rf_per_period)
+    downside_dev = np.sqrt((downside ** 2).mean()) * np.sqrt(periods_per_year)
+
+    sortino = (
+        (mean_ret - risk_free_rate) / downside_dev
+        if downside_dev != 0 else np.nan
+    )
+
+    cumulative = (1 + returns_series).cumprod()
+    peak = cumulative.cummax()
+    drawdown = cumulative / peak - 1
+    max_dd = drawdown.min()
+
+    total_return = cumulative.iloc[-1] - 1
+    recovery_factor = total_return / abs(max_dd) if max_dd != 0 else np.nan
 
     return {
         "sharpe": round(sharpe, 2),
-        "max_dd": f"{max_dd*100:.2f}%",
-        "recovery": round(recovery, 2)
+        "sortino": round(sortino, 2),
+        "max_dd": round(max_dd, 4),
+        "recovery": round(recovery_factor, 2)
     }
