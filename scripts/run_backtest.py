@@ -13,7 +13,7 @@ def run():
         return
         
     webhook = DiscordWebhook(url=webhook_url)
-    embed = DiscordEmbed(title="🛡️ AEGIS | Nexus Intelligence Suite", color="00e5ff")
+    embed = DiscordEmbed(title="ChainForge V2", color="00e5ff")
     
     # Standard Assets
     for symbol in ["BTC/USDT", "ETH/USDT", "SOL/USDT", "SUI/USDT"]:
