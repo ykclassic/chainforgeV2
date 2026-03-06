@@ -1,4 +1,4 @@
-import pandas_ta as ta
+import pandas_ta_classic as ta
 
 def generate_signals(df, balance=10000):
     # 1. Indicator Setup
