@@ -1,12 +1,14 @@
-name: Market Intelligence
+name: AEGIS Hourly Intelligence Cycle
 on:
   schedule:
-    - cron: '0 * * * *' # Every hour, on the hour
-  workflow_dispatch:   # Allows manual trigger
+    - cron: '0 * * * *' # Every Hour
+  workflow_dispatch:      # Manual Trigger
 
 jobs:
-  scan:
+  trade_cycle:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Required to push ledger updates
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -14,9 +16,16 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run AEGIS Engine
+        run: pip install pandas pandas_ta ccxt requests discord-webhook
+      - name: Run Cycle
         env:
-          CRYPTOPANIC_KEY: ${{ secrets.CRYPTOPANIC_KEY }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          CRYPTOPANIC_KEY: ${{ secrets.CRYPTOPANIC_KEY }}
         run: python -m scripts.run_backtest
+      - name: Commit & Push Ledger Changes
+        run: |
+          git config --global user.name 'AEGIS-Bot'
+          git config --global user.email 'bot@techsolute.com'
+          git add data/ledger.json
+          git commit -m "🤖 Update Ledger [skip ci]" || echo "No changes"
+          git push
