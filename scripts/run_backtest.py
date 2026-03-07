@@ -45,8 +45,8 @@ def run():
     # 3. Heartbeat Logic (9/10 TechSolute Style)
     if len(webhook.get_embeds()) == 0:
         # If no news, send the heartbeat message
-        heartbeat = DiscordEmbed(title="💓 AEGIS System Heartbeat", color="7289da")
-        heartbeat.set_description("“With Nexus, Patience is directly proportional to Profit.”")
+        heartbeat = DiscordEmbed(title="💓 ChainForge System Heartbeat", color="7289da")
+        heartbeat.set_description("“With ChainForge, Patience is directly proportional to Profit.”")
         heartbeat.add_embed_field(name="Status", value="🟢 Active & Scanning")
         heartbeat.add_embed_field(name="Time (UTC)", value=datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
         heartbeat.set_footer(text="Your bot is still busy forging quality setups for you.")
